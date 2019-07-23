@@ -1,31 +1,50 @@
 package com.example.pomodoro
 
+import android.content.Intent
+import android.content.SharedPreferences
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.SystemClock
+import android.os.SystemClock.currentThreadTimeMillis
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
+import android.widget.Chronometer
+import android.widget.ImageView
 import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
 import kotlinx.android.synthetic.main.activity_working.*
 import kotlin.concurrent.timer
 import com.example.pomodoro.TimeData
+import java.text.SimpleDateFormat
+import java.time.Duration
+import java.util.*
 
 class working : AppCompatActivity() {
+
+    lateinit var timeData: TimeData
+    private var private_mode = 0
+    private val pref_name = "RunningTime"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_working)
-        val timeData: TimeData = TimeData(1)
+
+        val duration = intent.getStringExtra("duration").toLong()
+        timeData = TimeData(duration, 200)
 
         // count down
         val timer = object : CountDownTimer(timeData.timeLeft, timeData.countDownInterval) {
             override fun onTick(millisUntilFinished: Long) {
-
+                // calculate the time left each interval i.e. each second
                 val minuteLeft = millisUntilFinished/timeData.minute
                 val secondLeft = millisUntilFinished%timeData.minute/timeData.second
                 timeReminder.setText("Time Left " + minuteLeft + ":" + secondLeft)
 
+                // the progress bar will reflect the time left
                 val timePercent = ((timeData.timeLeft-millisUntilFinished)*100/timeData.timeLeft).toInt()
                 progressBar.setProgress(timePercent)
             }
@@ -33,16 +52,68 @@ class working : AppCompatActivity() {
             override fun onFinish() {
                 fullfillcircle.visibility = View.VISIBLE
                 //  animation with fadein
-
-                YoYo.with(Techniques.FadeIn)
-                    .duration(5000)
-                    .repeat(0)
-                    .playOn(fullfillcircle);
-
+                fadeIn(fullfillcircle)
                 timeReminder.setText("Time's finished!")
+                goHome.setText("New Session?")
 
+                fullfillcircle.setOnTouchListener { _, event ->
+                    if(event.action == MotionEvent.ACTION_DOWN){
+                        circleChange()
+                        chronometerStart()
+                        fullfillcircle.isEnabled = false
+                    }
+                    true
+                }
             }
         }
         timer.start()
     }
+
+    fun fadeIn(circle: ImageView){
+        YoYo.with(Techniques.FadeIn)
+            .duration(1000)
+            .repeat(0)
+            .playOn(circle);
+    }
+
+    fun circleChange(){
+        elapsecircle.visibility = VISIBLE
+        fadeIn(elapsecircle)
+    }
+
+    fun chronometerStart(){
+        chronometer.base = SystemClock.elapsedRealtime()
+        chronometer.start()
+        chronometer.format = "Time Elapsed: %s"
+        chronometer.visibility = VISIBLE
+    }
+
+    fun goHome(view: View){
+        var total = 0
+        if(fullfillcircle.visibility == VISIBLE){
+            total = timeData.duration.toInt()
+        }
+        if(chronometer.visibility == VISIBLE){
+            val elapsedMillis = (SystemClock.elapsedRealtime() - chronometer.base)/timeData.minute
+            total = (elapsedMillis + timeData.duration).toInt()
+        }
+        recordSaver(total)
+        val myIntent = Intent(this, MainActivity::class.java)
+        startActivity(myIntent) // jump back to the start page
+
+    }
+    fun recordSaver(recordUpdate: Int){
+        val formatter = SimpleDateFormat("dd/MM/yyyy ")
+        val currentDate = formatter.format(Date())
+        val sharedPreference: SharedPreferences = this.getSharedPreferences(pref_name, private_mode)
+        val oldRecord = sharedPreference.getFloat(currentDate, 0f).toInt() // if there's no record, return 0 as default
+        Log.d("time", oldRecord.toString())
+        Log.d("time", recordUpdate.toString())
+        val newRecord = oldRecord + recordUpdate
+        Log.d("time", newRecord.toString())
+        val editor: SharedPreferences.Editor = sharedPreference.edit()
+        editor.putFloat(currentDate, newRecord.toFloat())
+        editor.commit()
+    }
+
 }

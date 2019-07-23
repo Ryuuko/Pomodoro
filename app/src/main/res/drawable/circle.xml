@@ -3,5 +3,5 @@
            android:shape="oval">
         <solid
                 android:innerRadiusRatio="2"
-                android:color="#575353"/>
+                android:color="#32ACE2"/>
     </shape>
