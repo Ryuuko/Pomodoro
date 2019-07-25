@@ -2,30 +2,29 @@ package com.example.pomodoro
 
 import android.content.Intent
 import android.content.SharedPreferences
+import android.media.MediaPlayer
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.SystemClock
-import android.os.SystemClock.currentThreadTimeMillis
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.widget.Chronometer
 import android.widget.ImageView
 import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
 import kotlinx.android.synthetic.main.activity_working.*
-import kotlin.concurrent.timer
-import com.example.pomodoro.TimeData
 import java.text.SimpleDateFormat
-import java.time.Duration
 import java.util.*
+import android.media.AudioManager
+import android.media.AudioManager.*
+
 
 class working : AppCompatActivity() {
 
     lateinit var timeData: TimeData
+    lateinit var mp: MediaPlayer
     private var private_mode = 0
     private val pref_name = "RunningTime"
 
@@ -35,6 +34,9 @@ class working : AppCompatActivity() {
 
         val duration = intent.getStringExtra("duration").toLong()
         timeData = TimeData(duration, 200)
+
+        // start the music
+        musicSetup()
 
         // count down
         val timer = object : CountDownTimer(timeData.timeLeft, timeData.countDownInterval) {
@@ -53,7 +55,7 @@ class working : AppCompatActivity() {
                 fullfillcircle.visibility = View.VISIBLE
                 //  animation with fadein
                 fadeIn(fullfillcircle)
-                timeReminder.setText("Time's finished!")
+                timeReminder.setText("Finished! Click me if you want to overrun")
                 goHome.setText("New Session?")
 
                 fullfillcircle.setOnTouchListener { _, event ->
@@ -116,4 +118,28 @@ class working : AppCompatActivity() {
         editor.commit()
     }
 
+    fun musicSetup(){
+        var first: Boolean = true
+        musicbutton.setOnClickListener {
+            if(first){
+                mp = MediaPlayer.create(this, R.raw.rainyshort)
+                Log.d("music", "playing first time")
+                musicbutton.setImageResource(R.drawable.radiodark)
+                mp.start()
+                mp.isLooping = true
+                first = false
+            }
+            else if(mp.isPlaying){
+                Log.d("music", "stop")
+                musicbutton.setImageResource(R.drawable.radiolight)
+                mp.stop()
+            }
+            else if(!mp.isPlaying && !first){
+                Log.d("music", "playing again")
+                musicbutton.setImageResource(R.drawable.radiodark)
+                mp.prepare()
+                mp.start()
+            }
+        }
+    }
 }

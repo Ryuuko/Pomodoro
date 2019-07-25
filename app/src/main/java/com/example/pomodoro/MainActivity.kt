@@ -9,12 +9,17 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.NumberPicker
+import android.widget.ProgressBar
+import android.widget.SeekBar
+import com.koushikdutta.ion.Ion
 import com.triggertrap.seekarc.SeekArc
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.dialog.*
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.round
+import kotlin.random.Random
 
 
 class MainActivity : AppCompatActivity() {
@@ -74,8 +79,10 @@ class MainActivity : AppCompatActivity() {
     fun seekbarControl(){
         seekBar.setOnSeekArcChangeListener(object : SeekArc.OnSeekArcChangeListener {
             override fun onStopTrackingTouch(seekArc: SeekArc) {
+                // TODO Auto-generated method stub
         }
             override fun onStartTrackingTouch(seekArc: SeekArc) {
+                // TODO Auto-generated method stub
             }
             override fun onProgressChanged(
                 seekArc: SeekArc, progress: Int,
@@ -147,4 +154,5 @@ class MainActivity : AppCompatActivity() {
         intent.putExtra("duration", timeDisplay.text.split(" ")[0]) // the first array will be the duration number
         startActivityForResult(intent, REQ_CODE)
     }
+
 }

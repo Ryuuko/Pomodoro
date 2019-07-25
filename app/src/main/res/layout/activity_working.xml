@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <android.support.constraint.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
@@ -6,7 +7,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".working">
-
 
     <TextView
             android:text="Time Left 25:00"
@@ -70,7 +70,7 @@
             android:visibility="gone"/>
 
     <Button
-            android:text="Hand slipped"
+            android:text="Give Up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/goHome" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
@@ -79,5 +79,16 @@
             app:layout_constraintHorizontal_bias="0.498" app:layout_constraintVertical_bias="0.0"
             app:layout_constraintTop_toBottomOf="@id/progressBar"
             android:onClick="goHome"/>
+
+    <ImageView
+            android:layout_width="50sp"
+            android:layout_height="50sp" app:srcCompat="@drawable/radiolight"
+            android:id="@+id/musicbutton"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginRight="30sp" android:layout_marginTop="50sp"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+
+
 
 </android.support.constraint.ConstraintLayout>
