@@ -1,8 +1,10 @@
 package com.example.pomodoro
 
+import android.app.*
 import android.content.Intent
 import android.content.SharedPreferences
 import android.media.MediaPlayer
+import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -17,14 +19,13 @@ import com.daimajia.androidanimations.library.YoYo
 import kotlinx.android.synthetic.main.activity_working.*
 import java.text.SimpleDateFormat
 import java.util.*
-import android.media.AudioManager
-import android.media.AudioManager.*
 
 
 class working : AppCompatActivity() {
 
     lateinit var timeData: TimeData
     lateinit var mp: MediaPlayer
+    lateinit var builder: Notification.Builder
     private var private_mode = 0
     private val pref_name = "RunningTime"
 
@@ -38,24 +39,30 @@ class working : AppCompatActivity() {
         // start the music
         musicSetup()
 
+        // set up notification
+        makeNotification()
+
         // count down
         val timer = object : CountDownTimer(timeData.timeLeft, timeData.countDownInterval) {
             override fun onTick(millisUntilFinished: Long) {
                 // calculate the time left each interval i.e. each second
                 val minuteLeft = millisUntilFinished/timeData.minute
                 val secondLeft = millisUntilFinished%timeData.minute/timeData.second
-                timeReminder.setText("Time Left " + minuteLeft + ":" + secondLeft)
+
+                val timeMessage = "Time Left " + minuteLeft + ":" + secondLeft
+                timeReminder.setText(timeMessage)
 
                 // the progress bar will reflect the time left
                 val timePercent = ((timeData.timeLeft-millisUntilFinished)*100/timeData.timeLeft).toInt()
                 progressBar.setProgress(timePercent)
+
             }
 
             override fun onFinish() {
                 fullfillcircle.visibility = View.VISIBLE
                 //  animation with fadein
                 fadeIn(fullfillcircle)
-                timeReminder.setText("Finished! Click me if you want to overrun")
+                // todo: timeReminder.setText("Finished! Click me if you want to overrun")
                 goHome.setText("New Session?")
 
                 fullfillcircle.setOnTouchListener { _, event ->
@@ -104,6 +111,7 @@ class working : AppCompatActivity() {
         startActivity(myIntent) // jump back to the start page
 
     }
+
     fun recordSaver(recordUpdate: Int){
         val formatter = SimpleDateFormat("dd/MM/yyyy ")
         val currentDate = formatter.format(Date())
@@ -142,4 +150,34 @@ class working : AppCompatActivity() {
             }
         }
     }
+
+    fun makeNotification(){
+        // Create channel for new Android versions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                ChannelID.toString(), ChannelName,
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            Log.d("channel!!!", channel.toString())
+            val manager = getSystemService(NOTIFICATION_SERVICE)
+                    as NotificationManager
+            manager.createNotificationChannel(channel)
+
+            builder = Notification.Builder(this, ChannelID.toString())
+                .setContentTitle("Remember your faith")
+                .setContentText("ouioui!")
+                .setAutoCancel(true)
+                .setSmallIcon(R.drawable.suttomarino)
+
+            val notification = builder.build()
+            manager.notify(ChannelID, notification)
+        }
+    }
+
+    companion object{
+        // Id code that is used to launch the time notifications
+        private const val ChannelName = "trackTimeNotify"
+        private const val ChannelID = 999
+    }
+
 }

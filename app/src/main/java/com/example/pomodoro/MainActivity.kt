@@ -3,6 +3,7 @@ package com.example.pomodoro
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
+import android.media.MediaPlayer
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -14,6 +15,7 @@ import android.widget.SeekBar
 import com.koushikdutta.ion.Ion
 import com.triggertrap.seekarc.SeekArc
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_working.*
 import kotlinx.android.synthetic.main.dialog.*
 import org.json.JSONObject
 import java.text.SimpleDateFormat
@@ -28,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     private val pref_name = "RunningTime"
     private val pref_name2 = "DefaultSetting"
     private var total = 0
+    private var soundtrigger = false // default of start sound is disable
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -39,15 +42,18 @@ class MainActivity : AppCompatActivity() {
         var defaultAim = sharedPreference2.getFloat("defaultAim", 2f).toInt() // if there's no record, return 2 as default
         var sessionTime = sharedPreference2.getFloat("sessionTime", 22f).toInt() // default: 25mins
 
-        /*set up*/
+        /* set up */
         val progress = progressCal(defaultAim)
         progressSetup(progress)
         seekBar.progress =  sessionTime
         timeTrans(sessionTime)
         seekbarControl()
 
-        /*calendar set up*/
+        /* calendar setup */
         calendarSetup()
+
+        /* start sound setup */
+        startsoundSetup()
     }
 
     fun progressCal(defaultAim: Int):Float{
@@ -65,9 +71,12 @@ class MainActivity : AppCompatActivity() {
 
     fun progressSetup(progress: Float){
         when{
-            progress<100f -> review.setText("You've learnt for $total mins today \n ${progress.toInt()}% of progress has been completed")
-            progress==100f -> review.setText("You've learnt for $total mins today \n Congratulations! You've completed today's requirement! Take a rest!")
-            progress>100f -> review.setText("You've learnt for $total mins today \n Wow! ${progress.toInt()}% has been made!")
+            progress<100f -> review.setText("You've learnt for $total mins today \n " +
+                    "${progress.toInt()}% of progress has been completed")
+            progress==100f -> review.setText("You've learnt for $total mins today \n " +
+                    "Congratulations! You've completed today's requirement! Take a rest!")
+            progress>100f -> review.setText("You've learnt for $total mins today \n " +
+                    "Wow! ${progress.toInt()}% has been made!")
         }
     }
 
@@ -148,10 +157,22 @@ class MainActivity : AppCompatActivity() {
         progressSetup(progress)
     }
 
+    fun startsoundSetup(){
+        startsound.setOnClickListener{
+            when(soundtrigger){
+                //todo: remember my default
+                false -> {startsound.setImageResource(R.drawable.noti_sounddark); soundtrigger = true}
+                true -> {startsound.setImageResource(R.drawable.noti_soundlight); soundtrigger = false}
+            }
+        }
+    }
+
     fun buttonClick(view: View){
         save("sessionTime", seekBar.progress)
         val intent = Intent(this, working::class.java)
         intent.putExtra("duration", timeDisplay.text.split(" ")[0]) // the first array will be the duration number
+        if(soundtrigger)
+        { MediaPlayer.create(this, R.raw.default0).start() }
         startActivityForResult(intent, REQ_CODE)
     }
 
