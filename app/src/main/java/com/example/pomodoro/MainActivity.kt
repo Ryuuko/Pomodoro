@@ -1,36 +1,22 @@
 package com.example.pomodoro
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.media.MediaPlayer
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import android.view.MotionEvent
 import android.view.View
-import android.widget.NumberPicker
-import android.widget.ProgressBar
-import android.widget.SeekBar
-import com.koushikdutta.ion.Ion
 import com.triggertrap.seekarc.SeekArc
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_working.*
-import kotlinx.android.synthetic.main.dialog.*
-import org.json.JSONObject
-import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.math.round
-import kotlin.random.Random
 
 
 class MainActivity : AppCompatActivity() {
     private val REQ_CODE = 123
     private var private_mode = 0
-    private val pref_name = "RunningTime"
+    private val pref_name1 = "RunningTime"
     private val pref_name2 = "DefaultSetting"
-    private var total = 0
-    private var soundtrigger = false // default of start sound is disable
+    private lateinit var userPref: UserPref
+    private lateinit var progressConverter: ProgressConverter
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -38,46 +24,27 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         /* create variables for setting up*/
+        val sharedPreference1: SharedPreferences = this.getSharedPreferences(pref_name1, private_mode)
         val sharedPreference2: SharedPreferences = this.getSharedPreferences(pref_name2, private_mode)
-        var defaultAim = sharedPreference2.getFloat("defaultAim", 2f).toInt() // if there's no record, return 2 as default
-        var sessionTime = sharedPreference2.getFloat("sessionTime", 22f).toInt() // default: 25mins
+        val editor2: SharedPreferences.Editor = sharedPreference2.edit()
 
-        /* set up */
-        val progress = progressCal(defaultAim)
-        progressSetup(progress)
-        seekBar.progress =  sessionTime
-        timeTrans(sessionTime)
+        userPref = UserPref(sharedPreference2, editor2)
+        progressConverter = ProgressConverter(sharedPreference1)
+
+        /* default page set up */
+        val progress = progressConverter.progressCal(userPref.defaultaim())
+        userPref.progressSetup(progressConverter.total(), progress, this) // calculate and display the progress
+
+        timeTrans(userPref.session()) // default duration on display
         seekbarControl()
 
         /* calendar setup */
-        calendarSetup()
+        planbutton.setOnClickListener {
+            userPref.dialogSetup(this)
+        }
 
         /* start sound setup */
-        startsoundSetup()
-    }
-
-    fun progressCal(defaultAim: Int):Float{
-        val formatter = SimpleDateFormat("dd/MM/yyyy ")
-        val currentDate = formatter.format(Date())
-
-        val sharedPreference: SharedPreferences = this.getSharedPreferences(pref_name, private_mode)
-        total = sharedPreference.getFloat(currentDate, 0f).toInt() // if there's no record, return 0 as default
-
-        val remainder = total/25f*5f  // the unused 5 mins per session of 25 mins will be counted
-        val todayCount = (total + remainder)/60
-
-        return round(todayCount/defaultAim*100)
-    }
-
-    fun progressSetup(progress: Float){
-        when{
-            progress<100f -> review.setText("You've learnt for $total mins today \n " +
-                    "${progress.toInt()}% of progress has been completed")
-            progress==100f -> review.setText("You've learnt for $total mins today \n " +
-                    "Congratulations! You've completed today's requirement! Take a rest!")
-            progress>100f -> review.setText("You've learnt for $total mins today \n " +
-                    "Wow! ${progress.toInt()}% has been made!")
-        }
+        userPref.startsoundSetup(this)
     }
 
     fun timeTrans(progress: Int){
@@ -86,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun seekbarControl(){
+        seekBar.progress = userPref.session() // default duration on seekarc
         seekBar.setOnSeekArcChangeListener(object : SeekArc.OnSeekArcChangeListener {
             override fun onStopTrackingTouch(seekArc: SeekArc) {
                 // TODO Auto-generated method stub
@@ -102,78 +70,12 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    fun calendarSetup(){
-        planbutton.setOnTouchListener { _, event ->
-            if(event.action == MotionEvent.ACTION_DOWN){
-                // initialize a new instance
-                dialogSetup()
-            }
-            true
-        }
-    }
-
-    fun dialogSetup(){
-
-        val npView = layoutInflater.inflate(R.layout.dialog, null)
-        val numberPicker = npView.findViewById<NumberPicker>(R.id.numberPicker)
-
-        val sharedPreference2: SharedPreferences = this.getSharedPreferences(pref_name2, private_mode)
-        var defaultAim = sharedPreference2.getFloat("defaultAim", 2f).toInt() // if there's no record, return 2 as default
-
-        // set up the picker for aim duration
-        numberPicker.maxValue = 6
-        numberPicker.minValue = 1
-        numberPicker.value = defaultAim
-        Log.d("hey!", defaultAim.toString())
-
-        val builder = android.app.AlertDialog.Builder(this)
-        // set title of the alert
-        builder.setTitle("Set Your Goal")
-        builder.setMessage("How many hours do you want to work per day?")
-        builder.setView(npView)
-            // Add action buttons
-            .setPositiveButton("Set",
-                DialogInterface.OnClickListener { dialog, _->
-                    val selectedValue = numberPicker.value
-                    aimReload(numberPicker)
-                    dialog.cancel()
-                })
-            .setNegativeButton("Cancel", null)
-        val dialog = builder.create()
-        dialog.show()
-    }
-
-    fun save(key: String, savedValue: Int){
-        val sharedPreference2: SharedPreferences = this.getSharedPreferences(pref_name2, private_mode)
-        val editor: SharedPreferences.Editor = sharedPreference2.edit()
-        editor.putFloat(key, savedValue.toFloat())
-        editor.commit()
-    }
-
-    fun aimReload(numberPicker: NumberPicker){
-        val defaultAim = numberPicker.value
-        save("defaultAim", defaultAim)
-        val progress = progressCal(defaultAim)
-        progressSetup(progress)
-    }
-
-    fun startsoundSetup(){
-        startsound.setOnClickListener{
-            when(soundtrigger){
-                //todo: remember my default
-                false -> {startsound.setImageResource(R.drawable.noti_sounddark); soundtrigger = true}
-                true -> {startsound.setImageResource(R.drawable.noti_soundlight); soundtrigger = false}
-            }
-        }
-    }
-
     fun buttonClick(view: View){
-        save("sessionTime", seekBar.progress)
+        userPref.sessionsave(seekBar.progress)
         val intent = Intent(this, working::class.java)
         intent.putExtra("duration", timeDisplay.text.split(" ")[0]) // the first array will be the duration number
-        if(soundtrigger)
+        if(userPref.startsound())
         { MediaPlayer.create(this, R.raw.default0).start() }
         startActivityForResult(intent, REQ_CODE)
     }
-
 }

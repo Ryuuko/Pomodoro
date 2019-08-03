@@ -11,12 +11,6 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             tools:replace="android:icon">
-        <service
-                android:name=".ClockService"
-                android:enabled="true"
-                android:exported="true">
-        </service>
-
         <activity android:name=".WelcomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

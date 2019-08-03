@@ -39,9 +39,6 @@ class working : AppCompatActivity() {
         // start the music
         musicSetup()
 
-        // set up notification
-        makeNotification()
-
         // count down
         val timer = object : CountDownTimer(timeData.timeLeft, timeData.countDownInterval) {
             override fun onTick(millisUntilFinished: Long) {
@@ -116,13 +113,11 @@ class working : AppCompatActivity() {
         val formatter = SimpleDateFormat("dd/MM/yyyy ")
         val currentDate = formatter.format(Date())
         val sharedPreference: SharedPreferences = this.getSharedPreferences(pref_name, private_mode)
-        val oldRecord = sharedPreference.getFloat(currentDate, 0f).toInt() // if there's no record, return 0 as default
-        Log.d("time", oldRecord.toString())
-        Log.d("time", recordUpdate.toString())
+        val oldRecord = sharedPreference.getInt(currentDate, 0) // if there's no record, return 0 as default
         val newRecord = oldRecord + recordUpdate
         Log.d("time", newRecord.toString())
         val editor: SharedPreferences.Editor = sharedPreference.edit()
-        editor.putFloat(currentDate, newRecord.toFloat())
+        editor.putInt(currentDate, newRecord)
         editor.commit()
     }
 
@@ -151,28 +146,6 @@ class working : AppCompatActivity() {
         }
     }
 
-    fun makeNotification(){
-        // Create channel for new Android versions
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                ChannelID.toString(), ChannelName,
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-            Log.d("channel!!!", channel.toString())
-            val manager = getSystemService(NOTIFICATION_SERVICE)
-                    as NotificationManager
-            manager.createNotificationChannel(channel)
-
-            builder = Notification.Builder(this, ChannelID.toString())
-                .setContentTitle("Remember your faith")
-                .setContentText("ouioui!")
-                .setAutoCancel(true)
-                .setSmallIcon(R.drawable.suttomarino)
-
-            val notification = builder.build()
-            manager.notify(ChannelID, notification)
-        }
-    }
 
     companion object{
         // Id code that is used to launch the time notifications
