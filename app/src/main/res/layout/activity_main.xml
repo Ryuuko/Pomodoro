@@ -50,6 +50,7 @@
             app:sweepAngle="320"
             android:rotation="20"
             android:id="@+id/seekBar"/>
+
     <TextView
             android:text="You have learnt for 0 mins today"
             android:layout_width="wrap_content"
@@ -59,11 +60,23 @@
             android:layout_marginEnd="8sp" android:layout_marginRight="8sp" android:layout_marginTop="100sp"
             app:layout_constraintTop_toTopOf="parent" app:layout_constraintHorizontal_bias="0.497"
             app:layout_constraintBottom_toTopOf="@id/seekBar"
-            android:id="@+id/review"/>
+            android:id="@+id/durationreview"/>
+
+    <TextView
+            android:text="100% everyday !!!!"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginLeft="8sp" android:layout_marginStart="8sp" app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8sp" android:layout_marginRight="8sp" android:layout_marginTop="150sp"
+            app:layout_constraintTop_toTopOf="parent" app:layout_constraintHorizontal_bias="0.497"
+            app:layout_constraintBottom_toTopOf="@id/seekBar"
+            android:id="@+id/progressreview"/>
 
     <ImageView
             android:layout_width="50sp"
-            android:layout_height="50sp" app:srcCompat="@android:drawable/ic_menu_today"
+            android:layout_height="50sp" app:srcCompat="@drawable/calendarlight"
             android:id="@+id/planbutton"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginRight="30sp" android:layout_marginTop="50sp"
@@ -71,9 +84,10 @@
 
     <ImageView
             android:layout_width="50sp"
-            android:layout_height="50sp" app:srcCompat="@drawable/noti_soundlight"
+            android:layout_height="50sp" app:srcCompat="@drawable/musicsoundlight"
             android:id="@+id/startsound"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginLeft="30sp" android:layout_marginTop="50sp"
             app:layout_constraintTop_toTopOf="parent"/>
+
 </android.support.constraint.ConstraintLayout>

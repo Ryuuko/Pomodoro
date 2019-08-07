@@ -82,13 +82,19 @@
 
     <ImageView
             android:layout_width="50sp"
-            android:layout_height="50sp" app:srcCompat="@drawable/radiolight"
-            android:id="@+id/musicbutton"
+            android:layout_height="50sp" app:srcCompat="@drawable/musicsoundlight"
+            android:id="@+id/musicsound"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginRight="30sp" android:layout_marginTop="50sp"
             app:layout_constraintTop_toTopOf="parent"/>
 
-
+    <ImageView
+            android:layout_width="50sp"
+            android:layout_height="50sp" app:srcCompat="@drawable/musicsoundlight"
+            android:id="@+id/endsound"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginLeft="30sp" android:layout_marginTop="50sp"
+            app:layout_constraintTop_toTopOf="parent"/>
 
 
 </android.support.constraint.ConstraintLayout>

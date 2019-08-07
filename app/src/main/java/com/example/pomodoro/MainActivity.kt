@@ -5,9 +5,11 @@ import android.content.SharedPreferences
 import android.media.MediaPlayer
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import com.triggertrap.seekarc.SeekArc
 import kotlinx.android.synthetic.main.activity_main.*
+
 
 
 class MainActivity : AppCompatActivity() {
@@ -32,19 +34,23 @@ class MainActivity : AppCompatActivity() {
         progressConverter = ProgressConverter(sharedPreference1)
 
         /* default page set up */
-        val progress = progressConverter.progressCal(userPref.defaultaim())
-        userPref.progressSetup(progressConverter.total(), progress, this) // calculate and display the progress
+        durationreview.setText("You've worked for ${progressConverter.duration()} mins today " )
+        if(userPref.calendartrigger()){
+            val progress = progressConverter.progressCal(userPref.defaultaim())
+            userPref.progressSetup(progress, this) // calculate and display the progress
+        }
+        else{
+            userPref.progressDisable(this)
+        }
 
         timeTrans(userPref.session()) // default duration on display
         seekbarControl()
 
         /* calendar setup */
-        planbutton.setOnClickListener {
-            userPref.dialogSetup(this)
-        }
+        userPref.calendarSetup(this)
 
         /* start sound setup */
-        userPref.startsoundSetup(this)
+        userPref.soundSetup(this, "startsound", startsound)
     }
 
     fun timeTrans(progress: Int){
@@ -74,8 +80,18 @@ class MainActivity : AppCompatActivity() {
         userPref.sessionsave(seekBar.progress)
         val intent = Intent(this, working::class.java)
         intent.putExtra("duration", timeDisplay.text.split(" ")[0]) // the first array will be the duration number
-        if(userPref.startsound())
-        { MediaPlayer.create(this, R.raw.default0).start() }
-        startActivityForResult(intent, REQ_CODE)
+        Log.d("saveSound", userPref.savedsound())
+        if(userPref.savedsound()!="null") {
+            val selected = userPref.savedsound().toLowerCase()
+            val ID = this.resources.getIdentifier(selected,
+                "raw", "com.example.pomodoro")
+            val mpStartSound = MediaPlayer.create(this, ID)
+            mpStartSound.start()
+            mpStartSound.setOnCompletionListener { mpStartSound.release()
+                startActivityForResult(intent, REQ_CODE)  } // release the object since start sound will be not used anymore
+            }
+        else{
+            startActivityForResult(intent, REQ_CODE)
+        }
     }
 }

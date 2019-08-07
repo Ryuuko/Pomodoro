@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">Pomodoro</string>
+    <string-array name="startsound">
+        <item>Dial0</item>
+        <item>Bark</item>
+        <item>Laser</item>
+    </string-array>
+    <string-array name="endsound">
+        <item>Dial0</item>
+        <item>Bark</item>
+        <item>Laser</item>
+    </string-array>
+    <string-array name="musicsound">
+        <item>Playground</item>
+        <item>Crickets</item>
+        <item>Creek</item>
+    </string-array>
 </resources>
