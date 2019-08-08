@@ -78,8 +78,12 @@ class MainActivity : AppCompatActivity() {
 
     fun buttonClick(view: View){
         userPref.sessionsave(seekBar.progress)
-        val intent = Intent(this, working::class.java)
-        intent.putExtra("duration", timeDisplay.text.split(" ")[0]) // the first array will be the duration number
+        val intent1 = Intent(this, CountdownService::class.java)
+        intent1.putExtra("duration", timeDisplay.text.split(" ")[0]) // the first array will be the duration number
+
+        val intent2 = Intent(this, Working::class.java)
+        intent2.putExtra("duration", timeDisplay.text.split(" ")[0]) // the first array will be the duration number
+
         Log.d("saveSound", userPref.savedsound())
         if(userPref.savedsound()!="null") {
             val selected = userPref.savedsound().toLowerCase()
@@ -87,11 +91,14 @@ class MainActivity : AppCompatActivity() {
                 "raw", "com.example.pomodoro")
             val mpStartSound = MediaPlayer.create(this, ID)
             mpStartSound.start()
-            mpStartSound.setOnCompletionListener { mpStartSound.release()
-                startActivityForResult(intent, REQ_CODE)  } // release the object since start sound will be not used anymore
+            mpStartSound.setOnCompletionListener {
+                mpStartSound.release()
+                startService(intent1)
+                startActivityForResult(intent2, REQ_CODE)  } // release the object since start sound will be not used anymore
             }
         else{
-            startActivityForResult(intent, REQ_CODE)
+            startService(intent1)
+            startActivityForResult(intent2, REQ_CODE)
         }
     }
 }
