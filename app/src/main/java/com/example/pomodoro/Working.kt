@@ -1,6 +1,8 @@
 package com.example.pomodoro
 
 import android.app.*
+import android.app.NotificationManager.IMPORTANCE_HIGH
+import android.app.NotificationManager.IMPORTANCE_MAX
 import android.content.*
 import android.media.MediaPlayer
 import android.os.Build
@@ -35,6 +37,7 @@ class Working : AppCompatActivity() {
     private lateinit var thisactivity: Activity
     private lateinit var manager: NotificationManager
 
+    private var notiOn = false
     private var destroy = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,54 +65,9 @@ class Working : AppCompatActivity() {
         filter.addAction("finished")
         registerReceiver(timerReceiver(), filter)
 
-    }
+        // set up the notification that will be activated only if onStop()
+        makeNotification()
 
-    override fun onStop() {
-        super.onStop()
-        if (!destroy){ makeNotification()} // we make notification only when the app runs in the backstage
-
-    }
-
-    override fun onRestart() {
-        super.onRestart()
-        manager.cancel(ChannelID)
-    }
-
-    fun makeNotification(){
-        // Create channel for new Android versions
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                ChannelID.toString(), ChannelName,
-                NotificationManager.IMPORTANCE_LOW // head-up notification
-            )
-            channel.setSound(null, null) // disable the sound from IMPORTANCE HIGH notification
-            channel.enableVibration(false)
-
-            manager = getSystemService(NOTIFICATION_SERVICE)
-                    as NotificationManager
-            manager.createNotificationChannel(channel)
-
-            builder = Notification.Builder(this, ChannelID.toString())
-                .setContentTitle("Remember your faith")
-                .setContentText("ouioui!")
-                .setSmallIcon(R.drawable.suttomarino)
-
-            // when user clicks the notification, launch the Working activity
-            val intent = Intent(this, Working::class.java)
-            val pendingIntent = PendingIntent.getActivity(
-                this, 0, intent, 0
-            )
-            builder.setContentIntent(pendingIntent)
-
-            val notification = builder.build()
-            manager.notify(ChannelID, notification)
-        }
-    }
-
-    companion object{
-        // Id code that is used to launch the time notifications
-        private const val ChannelName = "trackTimeNotify"
-        private const val ChannelID = 999
     }
 
     private inner class timerReceiver: BroadcastReceiver(){
@@ -126,6 +84,18 @@ class Working : AppCompatActivity() {
                     val timeMessage = "Time Left $minuteLeft : $secondLeft"
                     timeReminder.setText(timeMessage)
 
+                    // keep updating notification every second if it's activiated during onStop() phrase,
+                    // i.e. the app run in the background
+                    if(notiOn){
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                            // calculate the time left each interval i.e. each second
+
+                            builder.setContentText(timeMessage)
+                            val notification = builder.build()
+                            manager.notify(ChannelID, notification)
+                        }
+                    }
+
                     // the progress bar will reflect the time left
                     val timePercent = ((timeData.durtaionInMin-millisUntilFinished)*100/timeData.durtaionInMin).toInt()
                     progressBar.setProgress(timePercent)
@@ -136,6 +106,59 @@ class Working : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    fun makeNotification(){
+        // Create channel for new Android versions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                ChannelID.toString(), ChannelName,
+                NotificationManager.IMPORTANCE_HIGH // head-up notification
+            )
+
+//            channel.setSound(null, null) // disable the sound from IMPORTANCE HIGH notification
+//            channel.enableVibration(false)
+
+            channel.importance = IMPORTANCE_HIGH // in order to activate a head-up notification
+
+            manager = getSystemService(NOTIFICATION_SERVICE)
+                    as NotificationManager
+            manager.createNotificationChannel(channel)
+
+            builder = Notification.Builder(this, ChannelID.toString())
+                .setContentTitle("Remember your faith")
+                .setSmallIcon(R.drawable.suttomarino)
+
+
+            // when user clicks the notification, resume the Working activity
+            val intent = Intent(this, Working::class.java)
+            // the intent will avoid creating the activity since its already instantiated
+            intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+
+            val pendingIntent = PendingIntent.getActivity(
+                this, 0, intent, PendingIntent.FLAG_NO_CREATE
+            )
+            builder.setContentIntent(pendingIntent)
+        }
+    }
+
+    companion object{
+        // Id code that is used to launch the time notifications
+        private const val ChannelName = "trackTimeNotify"
+        private const val ChannelID = 999
+    }
+
+
+    override fun onStop() {
+        super.onStop()
+        if (!destroy){notiOn=true} // we make notification only when the app runs in the backstage
+
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        manager.cancel(ChannelID)
+        notiOn = false
     }
 
     fun finishClock(){
