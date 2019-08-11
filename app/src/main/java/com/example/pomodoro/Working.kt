@@ -2,13 +2,11 @@ package com.example.pomodoro
 
 import android.app.*
 import android.app.NotificationManager.IMPORTANCE_HIGH
-import android.app.NotificationManager.IMPORTANCE_MAX
 import android.content.*
 import android.media.MediaPlayer
 import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.os.SystemClock
 import android.util.Log
 import android.view.MotionEvent
@@ -17,7 +15,6 @@ import android.view.View.VISIBLE
 import android.widget.ImageView
 import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_working.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -44,6 +41,7 @@ class Working : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_working)
 
+        Log.d("creation", "i'm working now!")
         thisactivity = this
         val duration = intent.getStringExtra("duration").toLong()
         timeData = TimeData(duration)
@@ -97,7 +95,8 @@ class Working : AppCompatActivity() {
                     }
 
                     // the progress bar will reflect the time left
-                    val timePercent = ((timeData.durtaionInMin-millisUntilFinished)*100/timeData.durtaionInMin).toInt()
+                    Log.d("durationMillis", timeData.durationMillis.toString()) // todo why there's two duration value???
+                    val timePercent = ((timeData.durationMillis-millisUntilFinished)*100/timeData.durationMillis).toInt()
                     progressBar.setProgress(timePercent)
                 }
                 if(intent.action=="finished"){
@@ -166,7 +165,7 @@ class Working : AppCompatActivity() {
         fullfillcircle.visibility = View.VISIBLE
         //  animation with fadein
         fadeIn(fullfillcircle)
-        // todo: timeReminder.setText("Finished! Click me if you want to overrun")
+//        timeReminder.setText("Finished! Click me if you want to overrun")
 
         if(userPref1.savedsound()!="null") {
             val selected = userPref1.savedsound().toLowerCase()

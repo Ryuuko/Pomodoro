@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import com.triggertrap.seekarc.SeekArc
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -78,13 +79,22 @@ class MainActivity : AppCompatActivity() {
 
     fun buttonClick(view: View){
         userPref.sessionsave(seekBar.progress)
+        val duration = timeDisplay.text.split(" ")[0]
+
+        if(duration == "0"){
+            Log.d("hey!", "the duration is $duration")
+            Toast.makeText(this, "Hey! Go pick some values!", Toast.LENGTH_SHORT)
+        } // it will crash if 0 min is selected
+        else{ startSession(duration) }
+    }
+
+    fun startSession(duration: String){
         val intent1 = Intent(this, CountdownService::class.java)
-        intent1.putExtra("duration", timeDisplay.text.split(" ")[0]) // the first array will be the duration number
+        intent1.putExtra("duration", duration) // the first array will be the duration number
 
         val intent2 = Intent(this, Working::class.java)
-        intent2.putExtra("duration", timeDisplay.text.split(" ")[0]) // the first array will be the duration number
+        intent2.putExtra("duration", duration) // the first array will be the duration number
 
-        Log.d("saveSound", userPref.savedsound())
         if(userPref.savedsound()!="null") {
             val selected = userPref.savedsound().toLowerCase()
             val ID = this.resources.getIdentifier(selected,
@@ -95,7 +105,7 @@ class MainActivity : AppCompatActivity() {
                 mpStartSound.release()
                 startService(intent1)
                 startActivityForResult(intent2, REQ_CODE)  } // release the object since start sound will be not used anymore
-            }
+        }
         else{
             startService(intent1)
             startActivityForResult(intent2, REQ_CODE)

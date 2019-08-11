@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Pomodoro</string>
+    <string name="app_name">Submarino</string>
     <string-array name="startsound">
         <item>Dial0</item>
         <item>Bark</item>
