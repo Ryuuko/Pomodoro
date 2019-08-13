@@ -24,6 +24,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+
+        // enable full screen
+        try { this.supportActionBar!!.hide()
+        } catch (e: NullPointerException) { }
+
         setContentView(R.layout.activity_main)
 
         /* create variables for setting up*/
@@ -82,9 +87,8 @@ class MainActivity : AppCompatActivity() {
         val duration = timeDisplay.text.split(" ")[0]
 
         if(duration == "0"){
-            Log.d("hey!", "the duration is $duration")
-            Toast.makeText(this, "Hey! Go pick some values!", Toast.LENGTH_SHORT)
-        } // it will crash if 0 min is selected
+            Toast.makeText(this, "Hey! Stop playing me like that!!!  ⁄(⁄ ⁄•⁄ω⁄•⁄ ⁄)⁄", Toast.LENGTH_SHORT).show()
+        } // it will crash if 0 min is selected, since the duration number will be used to divide in order to have calculate progress
         else{ startSession(duration) }
     }
 
@@ -110,5 +114,11 @@ class MainActivity : AppCompatActivity() {
             startService(intent1)
             startActivityForResult(intent2, REQ_CODE)
         }
+    }
+
+    override fun onBackPressed() {
+        // do actually nothing, disable back button
+        Toast.makeText(this, "Plz restart the app if you want to read a random quote again ξ( ✿＞◡❛)",
+            Toast.LENGTH_SHORT).show()
     }
 }

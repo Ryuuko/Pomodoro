@@ -6,10 +6,13 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#daf8e3"
         tools:context=".Working">
 
     <TextView
             android:text="Loading ..."
+            android:fontFamily="sans-serif-condensed-medium"
+            android:textColor="#0086ad"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/timeReminder"
@@ -19,6 +22,7 @@
             android:textSize="20sp" app:layout_constraintTop_toTopOf="@+id/progressBar"
             app:layout_constraintBottom_toBottomOf="@+id/progressBar"/>
 
+
     <ProgressBar
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="350sp"
@@ -27,7 +31,7 @@
             app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8sp" android:layout_marginRight="8sp"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8sp"
             android:layout_marginStart="8sp" app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginBottom="140sp"
+            android:layout_marginBottom="70sp"
             android:layout_marginTop="0sp" app:layout_constraintTop_toTopOf="parent"
             android:secondaryProgress="100"
             android:progress="0"
@@ -35,19 +39,33 @@
             android:progressDrawable="@drawable/progresscircle" android:padding="0sp"/>
 
     <ImageView
-            android:layout_width="310sp"
-            android:layout_height="310sp" app:srcCompat="@drawable/circle"
+            android:layout_width="280sp"
+            android:layout_height="280sp" app:srcCompat="@drawable/circle"
             app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8sp" android:layout_marginRight="8sp"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8sp"
             android:layout_marginStart="8sp"
             android:textSize="20sp" app:layout_constraintTop_toTopOf="@+id/progressBar"
             app:layout_constraintBottom_toBottomOf="@+id/progressBar"
+            android:id="@+id/fullfillcircle"
+            android:visibility="gone"/>
+
+    <TextView
+            android:layout_width="200sp"
+            android:layout_height="50sp"
+            android:id="@+id/clickReminder"
+            android:gravity="center"
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8sp" android:layout_marginRight="8sp"
+            app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8sp"
+            android:layout_marginStart="8sp"
+            android:textSize="20sp" app:layout_constraintTop_toTopOf="@+id/progressBar"
+            app:layout_constraintBottom_toBottomOf="@+id/progressBar" android:text="Click the circle if work to failure "
+            android:textAllCaps="false" android:textColor="#daf8e3"
             android:visibility="gone"
-            android:id="@+id/fullfillcircle"/>
+    />
 
     <ImageView
-            android:layout_width="310sp"
-            android:layout_height="310sp" app:srcCompat="@drawable/circle2"
+            android:layout_width="250sp"
+            android:layout_height="250sp" app:srcCompat="@drawable/circle2"
             app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8sp" android:layout_marginRight="8sp"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8sp"
             android:layout_marginStart="8sp"
@@ -64,21 +82,25 @@
             app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8sp" android:layout_marginRight="8sp"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8sp"
             android:layout_marginStart="8sp"
-            android:textSize="25sp" app:layout_constraintTop_toTopOf="@+id/progressBar"
+            android:textSize="20sp" app:layout_constraintTop_toTopOf="@+id/progressBar"
             app:layout_constraintBottom_toBottomOf="@+id/progressBar"
-            android:textColor="#ffffff"
+            android:textColor="#daf8e3"
             android:visibility="gone"/>
 
     <Button
             android:text="Give Up"
+            android:padding="15sp"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:textColor="#daf8e3"
+            android:background="@drawable/selector"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/goHome" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp" app:layout_constraintStart_toStartOf="parent"
             android:layout_marginLeft="8dp" android:layout_marginStart="8dp"
             app:layout_constraintHorizontal_bias="0.498" app:layout_constraintVertical_bias="0.0"
-            app:layout_constraintTop_toBottomOf="@id/progressBar"
-            android:onClick="goHome" android:layout_marginBottom="160sp" app:layout_constraintBottom_toBottomOf="parent"/>
+            android:onClick="goHome"
+            app:layout_constraintTop_toBottomOf="@id/progressBar"/>
 
     <ImageView
             android:layout_width="50sp"
@@ -87,13 +109,16 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginRight="30sp" android:layout_marginTop="50sp"
             app:layout_constraintTop_toTopOf="parent"/>
+
     <TextView
             android:text="Music?"
+            app:fontFamily="sans-serif-light"
+            android:textColor="#0086ad"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginRight="30sp" android:layout_marginTop="100sp"
-            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginRight="30sp"
+            app:layout_constraintTop_toBottomOf="@id/musicsound"
             android:id="@+id/reminder3"/>
 
     <ImageView
@@ -106,11 +131,13 @@
 
     <TextView
             android:text="End Sound?"
+            app:fontFamily="sans-serif-light"
+            android:textColor="#0086ad"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginLeft="25sp" android:layout_marginTop="100sp"
-            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginLeft="25sp"
+            app:layout_constraintTop_toBottomOf="@+id/endsound"
             android:id="@+id/reminder4"/>
 
 

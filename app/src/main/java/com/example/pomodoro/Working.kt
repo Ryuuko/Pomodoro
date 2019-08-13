@@ -9,10 +9,11 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
-import android.view.MotionEvent
 import android.view.View
+import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.ImageView
+import android.widget.Toast
 import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
 import kotlinx.android.synthetic.main.activity_working.*
@@ -39,6 +40,11 @@ class Working : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // enable full screen
+        try { this.supportActionBar!!.hide()
+        } catch (e: NullPointerException) { }
+
         setContentView(R.layout.activity_working)
 
         Log.d("creation", "i'm working now!")
@@ -150,6 +156,7 @@ class Working : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
+        Log.d("hey!", "I'm Stopped!!")
         if (!destroy){notiOn=true} // we make notification only when the app runs in the backstage
 
     }
@@ -160,12 +167,25 @@ class Working : AppCompatActivity() {
         notiOn = false
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        //  make sure to clean out the service/timer if the activity is destroyed
+        serviceStop()
+        //make sure to clean out the  notification if accidentally shutdown happens
+        if(notiOn == true){manager.cancel(ChannelID)}
+    }
+
+    override fun onBackPressed() {
+        // do actually nothing, disable back button
+        Toast.makeText(this, "I think you should click the button above instead (｡ŏ_ŏ)",
+            Toast.LENGTH_SHORT).show()
+    }
+
     fun finishClock(){
         userPref2.releaseLast() // stop the music
         fullfillcircle.visibility = View.VISIBLE
         //  animation with fadein
         fadeIn(fullfillcircle)
-//        timeReminder.setText("Finished! Click me if you want to overrun")
 
         if(userPref1.savedsound()!="null") {
             val selected = userPref1.savedsound().toLowerCase()
@@ -178,21 +198,27 @@ class Working : AppCompatActivity() {
         }
 
         goHome.setText("New Session?")
+        clickReminder.visibility = VISIBLE
+        YoYo.with(Techniques.FadeIn)
+            .duration(500)
+            .repeat(0)
+            .playOn(clickReminder);
 
-        fullfillcircle.setOnTouchListener { _, event ->
-            if(event.action == MotionEvent.ACTION_DOWN){
-                circleChange()
-                chronometerStart()
-                fullfillcircle.isEnabled = false
-            }
-            true
+        fullfillcircle.setOnClickListener {
+            clickReminder.visibility = GONE
+            Toast.makeText(this, "Your extra effort will be not forgotten (ง๑ •̀_•́)ง",
+                Toast.LENGTH_SHORT).show()
+            circleChange()
+            chronometerStart()
+            fullfillcircle.isEnabled = false // it can be clickable only once
         }
     }
-    fun fadeIn(circle: ImageView){
+
+    fun fadeIn(imageView: ImageView){
         YoYo.with(Techniques.FadeIn)
-            .duration(1000)
+            .duration(500)
             .repeat(0)
-            .playOn(circle);
+            .playOn(imageView);
     }
 
     fun circleChange(){
@@ -211,17 +237,21 @@ class Working : AppCompatActivity() {
         var total = 0
         if(fullfillcircle.visibility == VISIBLE){
             total = timeData.duration.toInt()
-        }
-        if(chronometer.visibility == VISIBLE){
-            val elapsedMillis = (SystemClock.elapsedRealtime() - chronometer.base)/timeData.minute
-            total = (elapsedMillis + timeData.duration).toInt()
-        }
 
-        // stop the service's countdown timer as long as clicked
-        val intent = Intent(this, CountdownService::class.java)
-        this.stopService(intent)
+            // record the elapsed time if it has been ever run
+            if(chronometer.visibility == VISIBLE){
+                val elapsedMillis = (SystemClock.elapsedRealtime() - chronometer.base)/timeData.minute
+                total = (elapsedMillis + timeData.duration).toInt()
+            }
 
-        recordSaver(total)
+            recordSaver(total)
+
+        }
+        else{Toast.makeText(this, "It will not be counted if you give it up!!! Σ(;ﾟдﾟ)",
+            Toast.LENGTH_SHORT).show()}
+
+        // stop the countdown once the button is hitted
+        serviceStop()
         val myIntent = Intent(this, MainActivity::class.java)
         userPref2.releaseLast() // in case the user has activated the music button (musicsound), stop it here
         this.destroy = true // since we're going to destroy the activity and notify the onStop() not to activiate makeNotification()
@@ -239,5 +269,11 @@ class Working : AppCompatActivity() {
         val editor: SharedPreferences.Editor = sharedPreference.edit()
         editor.putInt(currentDate, newRecord)
         editor.commit()
+    }
+
+    fun serviceStop(){
+        // stop the service's countdown timer
+        val intent = Intent(this, CountdownService::class.java)
+        this.stopService(intent)
     }
 }
