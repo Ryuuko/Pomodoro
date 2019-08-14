@@ -13,14 +13,13 @@ import java.io.PrintWriter
 import java.io.StringWriter
 
 
-class UserPref(sharedPreference2: SharedPreferences, editor2: SharedPreferences.Editor) {
-    val sharedPreference2 = sharedPreference2
-    val editor2 = editor2
+class UserPref(sharedPreference: SharedPreferences, editor: SharedPreferences.Editor) {
+    val sharedPreference = sharedPreference
+    val editor = editor
 
-    private var sessionTime = sharedPreference2.getInt("sessionTime", 22) // default: 25minsr
-
-    private var calendartrigger = sharedPreference2.getBoolean("calendartrigger", false) // defalut as false
-    private var defaultaim = sharedPreference2.getInt("defaultAim", 2) // if there's no record, return 2 as default
+    private var sessionTime = sharedPreference.getInt("sessionTime", 22) // default: 25minsr
+    private var calendartrigger = sharedPreference.getBoolean("calendartrigger", false) // defalut as false
+    private var defaultaim = sharedPreference.getInt("defaultAim", 2) // if there's no record, return 2 as default
     private var progress = 0f
     private lateinit var progressConverter: ProgressConverter
     var savedsound = "null"
@@ -29,7 +28,7 @@ class UserPref(sharedPreference2: SharedPreferences, editor2: SharedPreferences.
     /* Sound Setup*/
     fun soundSetup(activity: Activity, soundtype: String, soundicon: ImageView){
 
-        savedsound = sharedPreference2.getString(soundtype, "null") // defalut as dial 0
+        savedsound = sharedPreference.getString(soundtype, "null") // defalut as dial 0
 
         when(savedsound!="null"){
             false -> {soundIcon(activity, soundtype, soundicon, "light")}
@@ -125,9 +124,9 @@ class UserPref(sharedPreference2: SharedPreferences, editor2: SharedPreferences.
     }
 
     fun soundSaver(soundtype: String){
-        editor2.putString(soundtype, savedsound)
+        editor.putString(soundtype, savedsound)
         Log.d("saveSound", "$savedsound is collected for $soundtype")
-        editor2.commit()
+        editor.commit()
     }
 
     /* Calendar Setup*/
@@ -149,8 +148,8 @@ class UserPref(sharedPreference2: SharedPreferences, editor2: SharedPreferences.
                     progressDisable(activity)
                     }
             }
-            editor2.putBoolean("calendartrigger", calendartrigger)
-            editor2.commit()
+            editor.putBoolean("calendartrigger", calendartrigger)
+            editor.commit()
         }
     }
 
@@ -166,14 +165,15 @@ class UserPref(sharedPreference2: SharedPreferences, editor2: SharedPreferences.
         val builder = android.app.AlertDialog.Builder(activity)
         // set title of the alert
         builder.setTitle("Set Your Goal")
-        builder.setMessage("How many hours do you want to work per day?")
+        builder.setMessage("How many hours do you want to work per day?\n " +
+                "(Good News! A traditional Pomodoro 25 mins will be treated as 30 mins here!)")
         builder.setView(npView)
             // Add action buttons
             .setPositiveButton("Set",
                 DialogInterface.OnClickListener { dialog, _->
                     defaultaim = numberPicker.value
-                    editor2.putInt("defaultAim", defaultaim)
-                    editor2.commit()
+                    editor.putInt("defaultAim", defaultaim)
+                    editor.commit()
                     aimReload(defaultaim, activity)
                     dialog.cancel()
                 })
@@ -191,12 +191,8 @@ class UserPref(sharedPreference2: SharedPreferences, editor2: SharedPreferences.
     }
 
     fun aimReload(defaultAim: Int, activity: Activity){
-        var private_mode = 0
-        val pref_name = "RunningTime"
-
-        val sharedPreference1: SharedPreferences = activity.getSharedPreferences(pref_name, private_mode)
-
-        progressConverter = ProgressConverter(sharedPreference1) // todo:call it in the progressSetup to match the logic
+        val runTime = sharedPreference.getInt("runTime", 2)
+        progressConverter = ProgressConverter(runTime) // todo:call it in the progressSetup to match the logic
         progress = progressConverter.progressCal(defaultAim)
         progressSetup(progress, activity)
     }
@@ -224,8 +220,8 @@ class UserPref(sharedPreference2: SharedPreferences, editor2: SharedPreferences.
     }
 
     fun sessionsave(newsession: Int){
-        editor2.putInt("sessionTime", newsession)
-        editor2.commit()
+        editor.putInt("sessionTime", newsession)
+        editor.commit()
     }
 
     fun defaultaim(): Int{

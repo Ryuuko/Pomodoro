@@ -10,14 +10,16 @@ import android.view.View
 import android.widget.Toast
 import com.triggertrap.seekarc.SeekArc
 import kotlinx.android.synthetic.main.activity_main.*
-
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.concurrent.thread
 
 
 class MainActivity : AppCompatActivity() {
     private val REQ_CODE = 123
     private var private_mode = 0
-    private val pref_name1 = "RunningTime"
-    private val pref_name2 = "DefaultSetting"
+    private val pref_name = "DefaultSetting"
+    val formatter = SimpleDateFormat("dd/MM/yyyy")
     private lateinit var userPref: UserPref
     private lateinit var progressConverter: ProgressConverter
 
@@ -31,16 +33,31 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
-        /* create variables for setting up*/
-        val sharedPreference1: SharedPreferences = this.getSharedPreferences(pref_name1, private_mode)
-        val sharedPreference2: SharedPreferences = this.getSharedPreferences(pref_name2, private_mode)
-        val editor2: SharedPreferences.Editor = sharedPreference2.edit()
 
-        userPref = UserPref(sharedPreference2, editor2)
-        progressConverter = ProgressConverter(sharedPreference1)
+        /* create variables for setting up*/
+        val sharedPreference: SharedPreferences = this.getSharedPreferences(pref_name, private_mode)
+        val editor: SharedPreferences.Editor = sharedPreference.edit()
+
+        val recordDate =  sharedPreference.getString("recordDate", "null") // if there's no record, return null as default
+
+        if(recordDate!="null"){
+            val recordDateFormat = formatter.parse(recordDate)
+            if(Date().before(recordDateFormat)){
+                // if today's date is before the recorded, aka the record from the past, the record will be refreshed
+                Log.d("hey!", "Don't clean me if the record is today or tmr!")
+                refresh(editor)
+            }
+        }else{
+            refresh(editor)
+        }
+
+        val runTime = sharedPreference.getInt("runTime", 0)
+
+        userPref = UserPref(sharedPreference, editor)
+        progressConverter = ProgressConverter(runTime)
 
         /* default page set up */
-        durationreview.setText("You've worked for ${progressConverter.duration()} mins today " )
+        durationreview.setText("You've worked for ${progressConverter.runTime()} mins today " )
         if(userPref.calendartrigger()){
             val progress = progressConverter.progressCal(userPref.defaultaim())
             userPref.progressSetup(progress, this) // calculate and display the progress
@@ -93,8 +110,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun startSession(duration: String){
-        val intent1 = Intent(this, CountdownService::class.java)
-        intent1.putExtra("duration", duration) // the first array will be the duration number
 
         val intent2 = Intent(this, Working::class.java)
         intent2.putExtra("duration", duration) // the first array will be the duration number
@@ -107,13 +122,17 @@ class MainActivity : AppCompatActivity() {
             mpStartSound.start()
             mpStartSound.setOnCompletionListener {
                 mpStartSound.release()
-                startService(intent1)
                 startActivityForResult(intent2, REQ_CODE)  } // release the object since start sound will be not used anymore
         }
         else{
-            startService(intent1)
             startActivityForResult(intent2, REQ_CODE)
         }
+    }
+
+    fun refresh(editor:SharedPreferences.Editor){
+        editor.putString("recordDate", formatter.format(Date()))
+        editor.putInt("runTime", 0)
+        editor.commit()
     }
 
     override fun onBackPressed() {
