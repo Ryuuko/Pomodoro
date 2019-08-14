@@ -41,9 +41,9 @@ class MainActivity : AppCompatActivity() {
         val recordDate =  sharedPreference.getString("recordDate", "null") // if there's no record, return null as default
 
         if(recordDate!="null"){
-            val recordDateFormat = formatter.parse(recordDate)
-            if(Date().before(recordDateFormat)){
-                // if today's date is before the recorded, aka the record from the past, the record will be refreshed
+            val today = formatter.format(Date())
+            if(!today.equals(recordDate)){
+                // if today's date is after the recorded, aka the record from the past, the record will be refreshed
                 Log.d("hey!", "Don't clean me if the record is today or tmr!")
                 refresh(editor)
             }
