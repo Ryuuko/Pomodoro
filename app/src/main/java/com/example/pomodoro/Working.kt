@@ -17,8 +17,6 @@ import android.widget.Toast
 import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
 import kotlinx.android.synthetic.main.activity_working.*
-import java.text.SimpleDateFormat
-import java.util.*
 
 
 class Working : AppCompatActivity() {
@@ -47,18 +45,21 @@ class Working : AppCompatActivity() {
 
         setContentView(R.layout.activity_working)
 
-        Log.d("creation", "i'm working now!")
         thisactivity = this
-        val duration = intent.getStringExtra("duration").toLong()
-        timeData = TimeData(duration)
+        val duration = intent.getStringExtra("duration")
+        timeData = TimeData(duration.toLong())
+
+        val intent1 = Intent(this, CountdownService::class.java)
+        intent1.putExtra("duration", duration) // the first array will be the duration number
+        startService(intent1)
 
         /* create variables for setting up*/
-        val sharedPreference2: SharedPreferences = this.getSharedPreferences(pref_name2, private_mode)
-        val editor2: SharedPreferences.Editor = sharedPreference2.edit()
+        val sharedPreference: SharedPreferences = this.getSharedPreferences(pref_name2, private_mode)
+        val editor: SharedPreferences.Editor = sharedPreference.edit()
 
         // separate two classes in order not to mess up with the savedsound variable, which needs to be treated differently in onFinish() function
-        userPref1 = UserPref(sharedPreference2, editor2)
-        userPref2 = UserPref(sharedPreference2, editor2)
+        userPref1 = UserPref(sharedPreference, editor)
+        userPref2 = UserPref(sharedPreference, editor)
 
         userPref1.soundSetup(this, "endsound", endsound) // set up the dialog and icon of end sound
         userPref2.soundSetup(this, "musicsound", musicsound) // set up the dialog and icon of radio box
@@ -68,9 +69,6 @@ class Working : AppCompatActivity() {
         filter.addAction("timeLeft")
         filter.addAction("finished")
         registerReceiver(timerReceiver(), filter)
-
-        // set up the notification that will be activated only if onStop()
-        makeNotification()
 
     }
 
@@ -88,18 +86,6 @@ class Working : AppCompatActivity() {
                     val timeMessage = "Time Left $minuteLeft : $secondLeft"
                     timeReminder.setText(timeMessage)
 
-                    // keep updating notification every second if it's activiated during onStop() phrase,
-                    // i.e. the app run in the background
-                    if(notiOn){
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-                            // calculate the time left each interval i.e. each second
-
-                            builder.setContentText(timeMessage)
-                            val notification = builder.build()
-                            manager.notify(ChannelID, notification)
-                        }
-                    }
-
                     // the progress bar will reflect the time left
                     Log.d("durationMillis", timeData.durationMillis.toString()) // todo why there's two duration value???
                     val timePercent = ((timeData.durationMillis-millisUntilFinished)*100/timeData.durationMillis).toInt()
@@ -113,66 +99,10 @@ class Working : AppCompatActivity() {
         }
     }
 
-    fun makeNotification(){
-        // Create channel for new Android versions
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                ChannelID.toString(), ChannelName,
-                NotificationManager.IMPORTANCE_HIGH // head-up notification
-            )
-
-//            channel.setSound(null, null) // disable the sound from IMPORTANCE HIGH notification
-//            channel.enableVibration(false)
-
-            channel.importance = IMPORTANCE_HIGH // in order to activate a head-up notification
-
-            manager = getSystemService(NOTIFICATION_SERVICE)
-                    as NotificationManager
-            manager.createNotificationChannel(channel)
-
-            builder = Notification.Builder(this, ChannelID.toString())
-                .setContentTitle("Remember your faith")
-                .setSmallIcon(R.drawable.suttomarino)
-
-
-            // when user clicks the notification, resume the Working activity
-            val intent = Intent(this, Working::class.java)
-            // the intent will avoid creating the activity since its already instantiated
-            intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-
-            val pendingIntent = PendingIntent.getActivity(
-                this, 0, intent, PendingIntent.FLAG_NO_CREATE
-            )
-            builder.setContentIntent(pendingIntent)
-        }
-    }
-
-    companion object{
-        // Id code that is used to launch the time notifications
-        private const val ChannelName = "trackTimeNotify"
-        private const val ChannelID = 999
-    }
-
-
-    override fun onStop() {
-        super.onStop()
-        Log.d("hey!", "I'm Stopped!!")
-        if (!destroy){notiOn=true} // we make notification only when the app runs in the backstage
-
-    }
-
-    override fun onRestart() {
-        super.onRestart()
-        manager.cancel(ChannelID)
-        notiOn = false
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         //  make sure to clean out the service/timer if the activity is destroyed
         serviceStop()
-        //make sure to clean out the  notification if accidentally shutdown happens
-        if(notiOn == true){manager.cancel(ChannelID)}
     }
 
     override fun onBackPressed() {
@@ -254,21 +184,22 @@ class Working : AppCompatActivity() {
         serviceStop()
         val myIntent = Intent(this, MainActivity::class.java)
         userPref2.releaseLast() // in case the user has activated the music button (musicsound), stop it here
-        this.destroy = true // since we're going to destroy the activity and notify the onStop() not to activiate makeNotification()
         startActivity(myIntent) // jump back to the start page
 
     }
 
     fun recordSaver(recordUpdate: Int){
-        val formatter = SimpleDateFormat("dd/MM/yyyy ")
-        val currentDate = formatter.format(Date())
-        val sharedPreference: SharedPreferences = this.getSharedPreferences(pref_name, private_mode)
-        val oldRecord = sharedPreference.getInt(currentDate, 0) // if there's no record, return 0 as default
+        val sharedPreference2: SharedPreferences = this.getSharedPreferences(pref_name2, private_mode)
+        val editor2: SharedPreferences.Editor = sharedPreference2.edit()
+
+        val oldRecord = sharedPreference2.getInt("runTime", 0) // if there's no record, return 0 as default
+        Log.d("hey!", oldRecord.toString())
         val newRecord = oldRecord + recordUpdate
-        Log.d("time", newRecord.toString())
-        val editor: SharedPreferences.Editor = sharedPreference.edit()
-        editor.putInt(currentDate, newRecord)
-        editor.commit()
+        Log.d("hey!", newRecord.toString())
+        editor2.putInt("runTime", newRecord)
+        editor2.commit()
+        Log.d("hey!", sharedPreference2.getInt("runTime", 0).toString())
+
     }
 
     fun serviceStop(){
