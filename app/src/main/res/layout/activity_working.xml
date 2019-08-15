@@ -112,7 +112,6 @@
 
     <TextView
             android:text="Music?"
-            app:fontFamily="sans-serif-light"
             android:textColor="#0086ad"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -131,7 +130,6 @@
 
     <TextView
             android:text="End Sound?"
-            app:fontFamily="sans-serif-light"
             android:textColor="#0086ad"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

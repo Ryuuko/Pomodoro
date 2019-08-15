@@ -13,6 +13,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.concurrent.thread
+import kotlin.math.round
 
 
 class MainActivity : AppCompatActivity() {
@@ -27,12 +28,12 @@ class MainActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
+
         // enable full screen
         try { this.supportActionBar!!.hide()
         } catch (e: NullPointerException) { }
 
         setContentView(R.layout.activity_main)
-
 
         /* create variables for setting up*/
         val sharedPreference: SharedPreferences = this.getSharedPreferences(pref_name, private_mode)
@@ -65,8 +66,11 @@ class MainActivity : AppCompatActivity() {
         else{
             userPref.progressDisable(this)
         }
+        val duration = timeTrans(userPref.session()) // default duration on display
+        timeDisplay.text = "$duration mins"
+        Log.d("hey!", "the default is $duration")
 
-        timeTrans(userPref.session()) // default duration on display
+        /* seekbar set up */
         seekbarControl()
 
         /* calendar setup */
@@ -76,9 +80,10 @@ class MainActivity : AppCompatActivity() {
         userPref.soundSetup(this, "startsound", startsound)
     }
 
-    fun timeTrans(progress: Int){
-        val time = (progress * 1.2).toInt().toString()
-        timeDisplay.text = "$time mins"
+    fun timeTrans(progress: Int): String{
+
+        val time = ((progress / 4.16).toInt() * 5).toString() // Interval = 5 mins
+        return time
     }
 
     fun seekbarControl(){
@@ -94,7 +99,10 @@ class MainActivity : AppCompatActivity() {
                 seekArc: SeekArc, progress: Int,
                 fromUser: Boolean
             ) {
-                timeTrans(progress)
+                Log.d("hey!", "progress is $progress")
+                val time = timeTrans(progress)
+                timeDisplay.text = "$time mins"
+                Log.d("hey!", "display is $time")
             }
         })
     }
@@ -122,11 +130,10 @@ class MainActivity : AppCompatActivity() {
             mpStartSound.start()
             mpStartSound.setOnCompletionListener {
                 mpStartSound.release()
-                startActivityForResult(intent2, REQ_CODE)  } // release the object since start sound will be not used anymore
+                 } // release the object since start sound will be not used anymore
         }
-        else{
+            Toast.makeText(this, "Here we go~~~Andiamo! ✧*｡٩(ˊᗜˋ*)و✧*｡", Toast.LENGTH_SHORT).show()
             startActivityForResult(intent2, REQ_CODE)
-        }
     }
 
     fun refresh(editor:SharedPreferences.Editor){

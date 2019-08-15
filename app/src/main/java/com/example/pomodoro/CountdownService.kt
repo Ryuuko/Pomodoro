@@ -60,13 +60,19 @@ class CountdownService : Service() {
             }
 
             override fun onFinish() {
-
-                timerInfo.action = "finished"
-                sendBroadcast(timerInfo)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                    builder.setContentTitle("Session Finished")
+                          .setContentText("END GAMEヾ(⌐■_■)ノ♪")
+                    val notification = builder.build()
+                    manager.notify(CountdownService.ChannelID, notification)
+                    timerInfo.action = "finished"
+                    sendBroadcast(timerInfo)
+                }
             }
         }
         timer.start()
     }
+
     fun makeNotification(){
         // Create channel for new Android versions
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

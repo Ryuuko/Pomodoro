@@ -17,7 +17,7 @@ class UserPref(sharedPreference: SharedPreferences, editor: SharedPreferences.Ed
     val sharedPreference = sharedPreference
     val editor = editor
 
-    private var sessionTime = sharedPreference.getInt("sessionTime", 22) // default: 25minsr
+    private var sessionTime = sharedPreference.getInt("sessionTime", 22) // default: 25 mins
     private var calendartrigger = sharedPreference.getBoolean("calendartrigger", false) // defalut as false
     private var defaultaim = sharedPreference.getInt("defaultAim", 2) // if there's no record, return 2 as default
     private var progress = 0f
@@ -42,9 +42,9 @@ class UserPref(sharedPreference: SharedPreferences, editor: SharedPreferences.Ed
         soundicon.setOnClickListener{
             Log.d("hey", savedsound)
             when(savedsound!="null"){
-                false -> {soundIcon(activity, soundtype, soundicon, "dark");
+                false -> {soundIcon(activity, soundtype, soundicon, "dark")
                 dialogsound(activity, soundtype, soundicon)}
-                true -> {soundIcon(activity, soundtype, soundicon, "light");
+                true -> {soundIcon(activity, soundtype, soundicon, "light")
                     releaseLast()
                     savedsound = "null"
                     soundSaver(soundtype)}
@@ -165,7 +165,7 @@ class UserPref(sharedPreference: SharedPreferences, editor: SharedPreferences.Ed
         val builder = android.app.AlertDialog.Builder(activity)
         // set title of the alert
         builder.setTitle("Set Your Goal")
-        builder.setMessage("How many hours do you want to work per day?\n " +
+        builder.setMessage("How many hours do you want to work per day?\n\n " +
                 "(Good News! A traditional Pomodoro 25 mins will be treated as 30 mins here!)")
         builder.setView(npView)
             // Add action buttons

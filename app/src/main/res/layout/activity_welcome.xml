@@ -11,7 +11,7 @@
         android:id="@+id/welcomeLayout">
 
     <TextView
-            android:text="If You're Going Through Hell, Keep Going."
+            android:text=""
             android:layout_width="300sp"
             android:layout_height="150sp"
             android:id="@+id/quote" app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
@@ -24,7 +24,7 @@
             android:textColor="#94828f"/>
 
     <TextView
-            android:text="─Winston Churchill"
+            android:text=""
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/authorName"
@@ -35,8 +35,9 @@
             app:fontFamily="sans-serif-black"
             android:textSize="15sp"
             android:textColor="#94828f"/>
+
     <TextView
-            android:text="Tap anywhere to dive in your Journey"
+            android:text="Tap anywhere to dive in your journey"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/tapReminder" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
@@ -46,7 +47,8 @@
             android:textSize="18sp"
             android:layout_marginBottom="180sp"
             app:fontFamily="sans-serif-medium"
-            android:textColor="#8f9482"/>
+            android:textColor="#8f9482"
+            android:visibility="gone"/>
     <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -56,6 +58,6 @@
             tools:layout_editor_absoluteX="17dp" android:id="@+id/editText"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginBottom="50sp"
-            app:fontFamily="sans-serif-light"
+            app:fontFamily="sans-serif"
             android:textColor="#8f9482"/>
 </android.support.constraint.ConstraintLayout>

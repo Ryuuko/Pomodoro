@@ -62,6 +62,7 @@
             android:layout_marginEnd="8sp" android:layout_marginRight="8sp" android:layout_marginTop="150sp"
             app:layout_constraintHorizontal_bias="0.497"
             app:layout_constraintBottom_toTopOf="@id/seekBar"
+            android:fontFamily="sans-serif-medium"
             android:id="@+id/durationreview"/>
 
     <TextView
@@ -75,6 +76,7 @@
             android:layout_marginEnd="8sp" android:layout_marginRight="8sp" android:layout_marginTop="50sp"
             app:layout_constraintTop_toTopOf="@id/durationreview" app:layout_constraintHorizontal_bias="0.497"
             app:layout_constraintBottom_toTopOf="@id/seekBar"
+            android:fontFamily="sans-serif-medium"
             android:id="@+id/progressreview"/>
 
     <ImageView
@@ -87,7 +89,6 @@
 
     <TextView
             android:text="Start Sound?"
-            app:fontFamily="sans-serif-light"
             android:textColor="#0086ad"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -106,7 +107,6 @@
 
     <TextView
             android:text="Daily Plan?"
-            app:fontFamily="sans-serif-light"
             android:textColor="#0086ad"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
