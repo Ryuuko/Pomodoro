@@ -158,7 +158,7 @@ class UserPref(sharedPreference: SharedPreferences, editor: SharedPreferences.Ed
         val numberPicker = npView.findViewById<NumberPicker>(R.id.numberPicker)
 
         // set up the picker for aim duration
-        numberPicker.maxValue = 6
+        numberPicker.maxValue = 10
         numberPicker.minValue = 1
         numberPicker.value = defaultaim
 

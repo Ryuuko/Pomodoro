@@ -31,14 +31,10 @@ class WelcomeActivity : AppCompatActivity() {
         welcomeLayout.setOnClickListener{
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
-            //todo ActivityManager: Process com.example.pomodoro (pid 10340) has died: vis  +99TOP  wtf???
         }
-
-
 
         if(isNetworkAvailable()){quoteFetch()}
         else{default()}
-
 
     }
 
@@ -49,7 +45,7 @@ class WelcomeActivity : AppCompatActivity() {
     }
 
 
-    fun quoteFetch(){
+    private fun quoteFetch(){
         Ion.with(this)
             .load("https://goodquotesapi.herokuapp.com/tag/motivation") // todo: make a random page if neccessary
             .asString()
@@ -69,7 +65,7 @@ class WelcomeActivity : AppCompatActivity() {
 //            "publication": null
 //        }
 
-    fun processQuote(result: String){
+    private fun processQuote(result: String){
 
         val json = JSONObject(result)
         val resultsArray = json.getJSONArray("quotes")
@@ -78,7 +74,7 @@ class WelcomeActivity : AppCompatActivity() {
         // Math.random() generate number from [0, 1), then it will never generate number
         // equal or greater than 1, which will cause the randomInt equal to or greater than the array length
 
-        var randomDouble = Math.random() * resultsArray.length()
+        val randomDouble = Math.random() * resultsArray.length()
         val randomInt = randomDouble.toInt()
 
         Log.d("random", resultsArray.length().toString())
@@ -110,10 +106,10 @@ class WelcomeActivity : AppCompatActivity() {
         display(quote, author)
     }
 
-    fun display(words: String, author: String){
-        quote.setText(words)
+    private fun display(words: String, author: String){
+        quote.text = words
         quoteAnimate(quote)
-        authorName.setText(author)
+        authorName.text = author
         quoteAnimate(authorName)
 
         // Runs the specified action on the UI thread with delay of 1.5 seocnd
@@ -127,7 +123,7 @@ class WelcomeActivity : AppCompatActivity() {
                 YoYo.with(Techniques.Flash)
                     .duration(4000)
                     .repeat(1000)
-                    .playOn(tapReminder);
+                    .playOn(tapReminder)
             }
         }
     }
@@ -136,6 +132,6 @@ class WelcomeActivity : AppCompatActivity() {
         YoYo.with(Techniques.FadeIn)
             .duration(1000)
             .repeat(0)
-            .playOn(text);
+            .playOn(text)
     }
 }

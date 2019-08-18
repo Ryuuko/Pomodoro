@@ -4,7 +4,7 @@
           package="com.example.pomodoro">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <application
             android:allowBackup="true"
@@ -14,6 +14,11 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             tools:replace="android:icon">
+        <service
+                android:name=".EndSoundService"
+                android:enabled="true"
+                android:exported="true">
+        </service>
         <service
                 android:name=".CountdownService"
                 android:enabled="true"
@@ -27,8 +32,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".Working"
-                  android:launchMode="singleTop">
+        <activity
+                android:name=".Working"
+                android:launchMode="singleTop">
         </activity>
         <activity
                 android:name=".MainActivity"

@@ -1,10 +1,8 @@
 package com.example.pomodoro
 
 import android.app.*
-import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.content.*
 import android.media.MediaPlayer
-import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.SystemClock
@@ -17,6 +15,7 @@ import android.widget.Toast
 import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
 import kotlinx.android.synthetic.main.activity_working.*
+import java.sql.Time
 
 
 class Working : AppCompatActivity() {
@@ -31,6 +30,7 @@ class Working : AppCompatActivity() {
     private lateinit var userPref1: UserPref
     private lateinit var userPref2: UserPref
     private lateinit var thisactivity: Activity
+    private lateinit var timeReceiver: BroadcastReceiver
     private lateinit var manager: NotificationManager
 
     private var notiOn = false
@@ -45,6 +45,8 @@ class Working : AppCompatActivity() {
 
         setContentView(R.layout.activity_working)
 
+        Log.d("heyyy", "I've been created")
+
         thisactivity = this
         val duration = intent.getStringExtra("duration")
         timeData = TimeData(duration.toLong())
@@ -57,53 +59,58 @@ class Working : AppCompatActivity() {
         val sharedPreference: SharedPreferences = this.getSharedPreferences(pref_name2, private_mode)
         val editor: SharedPreferences.Editor = sharedPreference.edit()
 
-        // separate two classes in order not to mess up with the savedsound variable, which needs to be treated differently in onFinish() function
+        // separate two classes in order not to mess up with the savedSound variable, which needs to be treated differently in onFinish() function
         userPref1 = UserPref(sharedPreference, editor)
         userPref2 = UserPref(sharedPreference, editor)
 
         userPref1.soundSetup(this, "endsound", endsound) // set up the dialog and icon of end sound
+        Log.d("heyyy", "the end sound is${userPref1.savedsound()}")
         userPref2.soundSetup(this, "musicsound", musicsound) // set up the dialog and icon of radio box
+        Log.d("heyyy", "the music sound is${userPref2.savedsound()}")
 
-        // listen for broadcast every seconds as the service's runing
-        val filter = IntentFilter()
-        filter.addAction("timeLeft")
-        filter.addAction("finished")
-        registerReceiver(timerReceiver(), filter)
+
+
+            setBroadcast()
+            Log.d("heyyy", "register first")
+            // listen for broadcast every seconds as the service's runing
+            val filter = IntentFilter()
+            filter.addAction("timeLeft")
+            filter.addAction("finished")
+            this.registerReceiver(timeReceiver, filter)
+
 
     }
 
-    private inner class timerReceiver: BroadcastReceiver(){
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if(intent!=null){
-                if(intent.action=="timeLeft"){
+    fun setBroadcast(){
+        timeReceiver = object : BroadcastReceiver(){
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if(intent!=null){
 
-                    // calculate the time left each interval i.e. each second
-                    val millisUntilFinished = intent.getLongExtra("millisUntilFinished", 0)
-                    val minuteLeft = millisUntilFinished/timeData.minute
-                    val secondLeft = millisUntilFinished%timeData.minute/timeData.second
+                    if(intent.action=="timeLeft"){
 
-                    // display the time
-                    val timeMessage = "Time Left $minuteLeft : $secondLeft"
-                    timeReminder.setText(timeMessage)
+                        // calculate the time left each interval i.e. each second
+                        val millisUntilFinished = intent.getLongExtra("millisUntilFinished", 0)
+                        val minuteLeft = millisUntilFinished/timeData.minute
+                        val secondLeft = millisUntilFinished%timeData.minute/timeData.second
 
-                    // the progress bar will reflect the time left
-                    Log.d("durationMillis", timeData.durationMillis.toString()) // todo why there's two duration value???
-                    val timePercent = ((timeData.durationMillis-millisUntilFinished)*100/timeData.durationMillis).toInt()
-                    progressBar.setProgress(timePercent)
-                }
-                if(intent.action=="finished"){
-                    Log.d("finished", "I've recieved the finished request")
-                    finishClock()
+                        // display the time
+                        val timeMessage = "Time Left $minuteLeft : $secondLeft"
+                        timeReminder.setText(timeMessage)
+                        Log.d("heyyy", "I've recieved$timeMessage")
+                        // the progress bar will reflect the time left
+                        Log.d("durationMillis", timeData.durationMillis.toString()) // todo why there's two duration value???
+                        val timePercent = ((timeData.durationMillis-millisUntilFinished)*100/timeData.durationMillis).toInt()
+                        progressBar.setProgress(timePercent)
+                    }
+                    if(intent.action=="finished"){
+                        Log.d("heyyy", "I've recieved the finished request")
+                        finishClock()
+                    }
                 }
             }
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        //  make sure to clean out the service/timer if the activity is destroyed
-        serviceStop()
-    }
 
     override fun onBackPressed() {
         // do actually nothing, disable back button
@@ -112,19 +119,22 @@ class Working : AppCompatActivity() {
     }
 
     fun finishClock(){
+        this.unregisterReceiver(timeReceiver) // unregister the timeReceiver since the session is over
         userPref2.releaseLast() // stop the music
         fullfillcircle.visibility = View.VISIBLE
         //  animation with fadein
         fadeIn(fullfillcircle)
 
         if(userPref1.savedsound()!="null") {
-            val selected = userPref1.savedsound().toLowerCase()
-            Log.d("hey", selected)
-            val ID = thisactivity.resources.getIdentifier(selected,
-                "raw", "com.example.pomodoro")
-            val mpEndSound = MediaPlayer.create(thisactivity, ID)
-            mpEndSound.start()
-            mpEndSound.setOnCompletionListener { mpEndSound.release() } // release the object since start sound will be not used anymore
+
+            //  start with different a different service
+            // since restart with ruin the current notification, which isn't intended
+            // move the following code to the new service
+            val selected = userPref1.savedsound().toLowerCase() // todo userPref1.savedsound() keep creating new instances
+            Log.d("heyyy", "I got$selected")
+            val intent = Intent(this, EndSoundService::class.java)
+            intent.putExtra("selected", selected)
+            startService(intent)
         }
 
         goHome.setText("New Session?")
@@ -180,12 +190,11 @@ class Working : AppCompatActivity() {
         else{Toast.makeText(this, "It will not be counted if you give it up!!! Σ(;ﾟдﾟ)",
             Toast.LENGTH_SHORT).show()}
 
-        // stop the countdown once the button is hitted
-        serviceStop()
         val myIntent = Intent(this, MainActivity::class.java)
         userPref2.releaseLast() // in case the user has activated the music button (musicsound), stop it here
         startActivity(myIntent) // jump back to the start page
 
+        finish() // destroy this activity
     }
 
     fun recordSaver(recordUpdate: Int){
@@ -199,6 +208,24 @@ class Working : AppCompatActivity() {
         editor2.putInt("runTime", newRecord)
         editor2.commit()
         Log.d("hey!", sharedPreference2.getInt("runTime", 0).toString())
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d("heyyy", "I'm stopped")
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        Log.d("heyyy", "I'm restarted")
+    }
+
+    override fun onDestroy() {
+        //  make sure to clean out the service/timer if the activity is destroyed
+        Log.d("heyyy", "I'm destroyed")
+        serviceStop()
+        super.onDestroy()
 
     }
 

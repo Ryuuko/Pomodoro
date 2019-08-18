@@ -43,6 +43,7 @@ class CountdownService : Service() {
                 timerInfo.action = "timeLeft"
                 timerInfo.putExtra("millisUntilFinished", millisUntilFinished)
                 sendBroadcast(timerInfo)
+                Log.d("heyyy", "sending$timerInfo ")
                 // calculate the time left each interval i.e. each second
                 val minuteLeft = millisUntilFinished/timeData.minute
                 val secondLeft = millisUntilFinished%timeData.minute/timeData.second
@@ -66,6 +67,7 @@ class CountdownService : Service() {
                     val notification = builder.build()
                     manager.notify(CountdownService.ChannelID, notification)
                     timerInfo.action = "finished"
+                    Log.d("heyyy", "I've finished Countdown")
                     sendBroadcast(timerInfo)
                 }
             }
@@ -118,8 +120,10 @@ class CountdownService : Service() {
     }
 
     override fun onDestroy() {
+
         timer.cancel()
         super.onDestroy()
+
     }
 
 }
