@@ -1,19 +1,18 @@
 package com.example.pomodoro
 
-import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import com.daimajia.androidanimations.library.Techniques
 import com.daimajia.androidanimations.library.YoYo
-import com.koushikdutta.ion.Ion
 import kotlinx.android.synthetic.main.activity_welcome.*
 import org.json.JSONObject
-import android.net.ConnectivityManager
 import android.os.SystemClock
 import android.view.View.VISIBLE
 import android.widget.TextView
+import java.io.BufferedReader
+import java.io.InputStream
 import kotlin.concurrent.thread
 
 
@@ -33,24 +32,21 @@ class WelcomeActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        if(isNetworkAvailable()){quoteFetch()}
-        else{default()}
+        quoteFetch()
 
     }
-
-    private fun isNetworkAvailable(): Boolean {
-        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetworkInfo = connectivityManager.activeNetworkInfo
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected
-    }
-
 
     private fun quoteFetch(){
-        Ion.with(this)
-            .load("https://goodquotesapi.herokuapp.com/tag/motivation") // todo: make a random page if neccessary
-            .asString()
-            .setCallback { _, result ->
-                processQuote(result)
+        // read the json as String
+            var json: String? = null
+            try {
+                // geting the data from the internal storage
+                val inputStream: InputStream = resources.openRawResource(R.raw.quotes)
+                // read the line by line and pack all the data into the same josn string
+                json = inputStream.bufferedReader().use{it.readText()}
+                processQuote(json)
+            } catch (e: Exception) {
+                default()
             }
     }
 
@@ -67,6 +63,7 @@ class WelcomeActivity : AppCompatActivity() {
 
     private fun processQuote(result: String){
 
+        Log.d("heyyy", "it's being processed")
         val json = JSONObject(result)
         val resultsArray = json.getJSONArray("quotes")
 
@@ -101,7 +98,7 @@ class WelcomeActivity : AppCompatActivity() {
     }
 
     private fun default(){
-        val quote = "If You're Going Through Hell, Keep Going."
+        val quote = "If you're going through hell, keep going."
         val author = "─Winston Churchill"
         display(quote, author)
     }

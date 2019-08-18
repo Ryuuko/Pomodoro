@@ -53,7 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingLeft="20sp"
-            android:text="Quote collected by Goodreads \nGoodQuotes API created by Trey Mosley (iiimosley)"
+            android:text="Quote collected by Goodreads\nDerived from Trey Mosley (iiimosley)'s GoodQuotes API"
             android:ems="10"
             tools:layout_editor_absoluteX="17dp" android:id="@+id/editText"
             app:layout_constraintBottom_toBottomOf="parent"
